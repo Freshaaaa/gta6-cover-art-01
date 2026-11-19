@@ -1,23 +1,41 @@
-// A working gta6-cover-art-01 entry (Node 22, standard library only): the app is this directory's app/ folder, plain
-// static files a desktop browser loads offline (app/index.html and its ES modules, no library and no network
-// request), and the program hands it in. It copies app/ and screenshots/ from beside this file to /output and writes
-// /output/dossier.json, the summary the judge reads, with the vendored make.fun library. Only the plumbing, not the
-// cover art the bounty asks for: Cover Snap, a plain one-photo square cover with a sunset tint and a bold caption,
-// exported as a 1080 x 1080 PNG. Its two sample photos (app/samples/) were made for make.fun with an image model and
-// are free to use. Build your own GTA-style cover maker in its place, put your 3 or 4 PNG or JPEG screenshots in
-// screenshots/ (the first by name is the cover) and run it.
+// Vice Cover — a gta6-cover-art-01 entry (Node 22, standard library only): the app is this directory's
+// app/ folder, plain static files a desktop browser loads offline (app/index.html and its ES modules, no
+// library and no network request), and the program hands it in. It copies app/ and screenshots/ from beside
+// this file to /output and writes /output/dossier.json, the summary the judge reads, with the vendored
+// make.fun library. The app: photos + a caption become GTA-style poster art — a 7-panel collage (hero +
+// 2x3 vignette grid, 9 sample photos) with a huge gradient title, a sunset banner, decorative badges, 3
+// color grades (Vice Sunset / Neon Nights / Vice Noir), and PNG export in 3 sizes (1080x1080, 1080x1350,
+// 1920x1080). Put your 4 PNG or JPEG screenshots in screenshots/ (the first by name is the cover) and run it.
 //
 // Serve it locally with `node serve.ts`, then open http://localhost:8080.
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-app.ts';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+
+// Validate before copying: the dossier is only as good as the files it ships. Check the inputs the judge
+// actually reads — the cover module, every sample photo the seven panels load, and every screenshot
+// shots.json names — and stop with the missing item's name instead of handing in a broken build.
+const panelPhotos = ['boulevard', 'policecar', 'gangster', 'jablay', 'policeofficer', 'sportscar', 'neonstreet'];
+const required = [
+  join(here, 'app', 'src', 'cover.js'),
+  ...panelPhotos.map((name) => join(here, 'app', 'samples', `${name}.jpg`)),
+];
+for (const shot of JSON.parse(readFileSync(join(here, 'shots.json'), 'utf8'))) {
+  required.push(join(here, 'screenshots', shot.name));
+}
+const missing = required.filter((path) => !existsSync(path));
+if (missing.length > 0) {
+  console.error(`main.ts: refusing to build — ${missing.length} required file(s) missing:`);
+  for (const path of missing) console.error(`  ${path}`);
+  process.exit(1);
+}
 
 mkdirSync(out, { recursive: true });
 cpSync(join(here, 'app'), join(out, 'app'), { recursive: true });

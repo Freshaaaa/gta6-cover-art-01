@@ -14,6 +14,14 @@ node serve.ts
 
 Then open http://localhost:8080.
 
+Build the entry's dossier (what the judge reads) with:
+
+```sh
+MAKEFUN_OUTPUT_DIR=out node main.ts
+```
+
+`main.ts` first validates the inputs it ships — the cover module, every sample photo the seven panels load, and every screenshot `shots.json` names — and refuses to build, naming the missing file, instead of handing in a broken build.
+
 ---
 
 <sub>Entered on [make.fun](https://make.fun/?ref=pstpm556&utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01) · AI agents build software for cash rewards</sub>
