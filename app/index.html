@@ -3,20 +3,72 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cover Snap</title>
+<title>Vice Cover — GTA-style poster maker</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ff2d78'/%3E%3Ctext x='32' y='46' font-family='Arial Black,sans-serif' font-size='36' font-weight='900' fill='%23ffd21f' text-anchor='middle'%3EV%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <main class="app">
-  <section class="controls">
-    <h1>Cover Snap</h1>
-    <p>A photo and a caption, made into a square cover.</p>
-    <label>Photo <input id="photo" type="file" accept="image/*"></label>
-    <label>Caption <input id="caption" type="text" maxlength="40" value="Sunset Heist"></label>
-    <button id="export" type="button">Export PNG 1080 x 1080</button>
+  <section class="controls" aria-label="Cover editor">
+    <h1>Vice Cover</h1>
+    <p class="tagline">Turn your photos into a GTA-style poster. Pick photos, write the title, choose a grade and a size, export the PNG.</p>
+
+    <fieldset>
+      <legend>Photos</legend>
+      <label>Hero photo <input id="photo-hero" type="file" accept="image/*"></label>
+      <div class="vig-inputs">
+        <label>Vignette 1 <input id="photo-v1" type="file" accept="image/*"></label>
+        <label>Vignette 2 <input id="photo-v2" type="file" accept="image/*"></label>
+        <label>Vignette 3 <input id="photo-v3" type="file" accept="image/*"></label>
+      </div>
+      <div class="row">
+        <button id="fill-all" type="button">Hero photo in all panels</button>
+        <button id="reset-samples" type="button">Reset samples</button>
+      </div>
+      <p class="hint">Drag the cover to move the photo inside a panel. Click a vignette to select it.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Zoom &amp; position</legend>
+      <label>Hero zoom <input id="zoom-hero" type="range" min="1" max="3" step="0.05" value="1"></label>
+      <label>Vignette 1 zoom <input id="zoom-v1" type="range" min="1" max="3" step="0.05" value="1"></label>
+      <label>Vignette 2 zoom <input id="zoom-v2" type="range" min="1" max="3" step="0.05" value="1"></label>
+      <label>Vignette 3 zoom <input id="zoom-v3" type="range" min="1" max="3" step="0.05" value="1"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Lettering</legend>
+      <label>Title <input id="title" type="text" maxlength="24" value="VICE SUNSET"></label>
+      <label>Subtitle <input id="subtitle" type="text" maxlength="48" value="CHASE THE LAST LIGHT"></label>
+      <label>Location badge <input id="badge" type="text" maxlength="20" value="PALM BAY"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Colour grade</legend>
+      <div class="seg" id="grades" role="group" aria-label="Colour grade">
+        <button type="button" data-grade="sunset" class="on">Vice Sunset</button>
+        <button type="button" data-grade="neon">Neon Nights</button>
+        <button type="button" data-grade="noir">Vice Noir</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Export size</legend>
+      <div class="seg" id="sizes" role="group" aria-label="Export size">
+        <button type="button" data-size="1080x1080" class="on">Square 1080&times;1080</button>
+        <button type="button" data-size="1080x1350">Portrait 1080&times;1350</button>
+        <button type="button" data-size="1920x1080">Wide 1920&times;1080</button>
+      </div>
+    </fieldset>
+
+    <button id="export" type="button" class="export">Export PNG</button>
     <p id="status" role="status"></p>
   </section>
-  <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
+
+  <section class="preview" aria-label="Live preview">
+    <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
+    <p class="preview-hint">Live preview — what you see is what the PNG looks like.</p>
+  </section>
 </main>
 <script type="module" src="./src/main.js"></script>
 </body>
