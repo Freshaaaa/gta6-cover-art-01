@@ -9,7 +9,8 @@
 export const GRADES = {
   sunset: {
     label: 'Vice Sunset',
-    filter: '',
+    // Mild warm cast so bright-day and dark-night photos share one sunset mood.
+    filter: 'sepia(0.20) saturate(1.15)',
     accent: '#ffd21f',
     glow: 'rgba(255,45,120,0.55)',
     titleStops: [[0, '#ffe14d'], [0.55, '#ff7a1a'], [1, '#ff2d78']],
@@ -112,6 +113,13 @@ function drawPhotoPanel(ctx, r, panel, grade) {
     ctx.fillStyle = '#241534';
     ctx.fillRect(r.x, r.y, r.w, r.h);
   }
+  // Uniform warm tint (sunset grade only): one warm cast across the whole panel so
+  // bright-day and dark-night photos share a single sunset mood. The neon and the
+  // subjects stay readable — the tint is light and the bottom wash does the rest.
+  if (grade === GRADES.sunset) {
+    ctx.fillStyle = 'rgba(255,122,45,0.10)';
+    ctx.fillRect(r.x, r.y, r.w, r.h);
+  }
   // Warm sunset wash rising from the bottom of every panel.
   const wash = ctx.createLinearGradient(0, r.y + r.h * 0.45, 0, r.y + r.h);
   if (grade === GRADES.noir) {
@@ -123,7 +131,7 @@ function drawPhotoPanel(ctx, r, panel, grade) {
     wash.addColorStop(1, 'rgba(120,10,90,0.34)');
   } else {
     wash.addColorStop(0, 'rgba(255,120,40,0)');
-    wash.addColorStop(0.6, 'rgba(255,90,40,0.12)');
+    wash.addColorStop(0.6, 'rgba(255,90,40,0.15)');
     wash.addColorStop(1, 'rgba(200,30,120,0.34)');
   }
   ctx.fillStyle = wash;

@@ -21,7 +21,7 @@ const PANEL_KEYS = ['hero', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6'];
 // row 1 = police car under neon + gangster at sunset, row 2 = glamorous woman on a neon
 // street + police officer at night, row 3 = orange sports car + neon street.
 const DEFAULT_CROPS = [
-  { sample: 'boulevard', zoom: 1.15, ox: 0, oy: 0 },
+  { sample: 'boulevard', zoom: 1.5, ox: 0, oy: 0.9 },
   { sample: 'policecar', zoom: 1.15, ox: 0, oy: 0 },
   { sample: 'gangster', zoom: 1.15, ox: 0, oy: 0 },
   { sample: 'jablay', zoom: 1.15, ox: 0, oy: 0 },
