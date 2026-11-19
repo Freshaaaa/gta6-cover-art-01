@@ -1,5 +1,5 @@
 // Fixed scenes for screenshots: ?shot=editor shows the page with sample photos loaded;
-// ?shot=cover shows the cover alone. Query params: photo (hero sample), v1/v2/v3/v4/v5
+// ?shot=cover shows the cover alone. Query params: photo (hero sample), v1/v2/v3/v4/v5/v6
 // (vignette samples), caption (title), sub (subtitle), badge (location pill), grade, size.
 // window.__shotReady is set once the scene is painted with the display font loaded.
 export async function runShot(shot, query, setup) {
@@ -10,7 +10,8 @@ export async function runShot(shot, query, setup) {
     v2: query.get('v2') ?? 'gangster',
     v3: query.get('v3') ?? 'jablay',
     v4: query.get('v4') ?? 'sportscar',
-    v5: query.get('v5') ?? 'neonstreet',
+    v5: query.get('v5') ?? 'sportscar',
+    v6: query.get('v6') ?? 'neonstreet',
     title: query.get('caption') ?? 'VICE SUNSET',
     subtitle: query.get('sub') ?? 'CHASE THE LAST LIGHT',
     badge: query.get('badge') ?? 'PALM BAY',

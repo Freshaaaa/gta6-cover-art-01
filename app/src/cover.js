@@ -1,5 +1,5 @@
-// Vice Cover poster renderer: a GTA key-art collage — one big hero panel on the left, five
-// smaller panels on the right (a 2x2 grid plus one wide vignette along the bottom), white
+// Vice Cover poster renderer: a GTA key-art collage — one big hero panel on the left, six
+// smaller panels on the right (a uniform 2x3 grid), white
 // gutters, a sunset banner along the foot
 // with a skyline silhouette, and a huge gradient title with a thick dark outline straddling
 // the collage and the banner. Decorative badges (location pill, EST. starburst, NEW circle,
@@ -46,30 +46,31 @@ export function posterLayout(w, h) {
   const heroW = Math.round((iw - gap) * 0.58);
   const rightX = ix + heroW + gap;
   const rightW = iw - heroW - gap;
-  // Right column: a 2x2 grid of vignettes on top, one wide vignette along the bottom.
-  const wideH = Math.round(collageH * 0.30);
-  const gridH = collageH - wideH - gap;
-  const topH = Math.round((gridH - gap) / 2);
-  const botH = gridH - topH - gap;
+  // Right column: a uniform 2x3 grid of six vignettes.
   const vigW = Math.round((rightW - gap) / 2);
+  const vigW2 = rightW - vigW - gap;
+  const rowH = Math.round((collageH - gap * 2) / 3);
+  const rowH3 = collageH - rowH * 2 - gap * 2;
+  const r1 = iy, r2 = iy + rowH + gap, r3 = iy + rowH * 2 + gap * 2;
   return {
     frame, gap,
     hero: { x: ix, y: iy, w: heroW, h: collageH },
-    v1: { x: rightX, y: iy, w: vigW, h: topH },
-    v2: { x: rightX + vigW + gap, y: iy, w: rightW - vigW - gap, h: topH },
-    v3: { x: rightX, y: iy + topH + gap, w: vigW, h: botH },
-    v4: { x: rightX + vigW + gap, y: iy + topH + gap, w: rightW - vigW - gap, h: botH },
-    v5: { x: rightX, y: iy + gridH + gap, w: rightW, h: wideH },
+    v1: { x: rightX, y: r1, w: vigW, h: rowH },
+    v2: { x: rightX + vigW + gap, y: r1, w: vigW2, h: rowH },
+    v3: { x: rightX, y: r2, w: vigW, h: rowH },
+    v4: { x: rightX + vigW + gap, y: r2, w: vigW2, h: rowH },
+    v5: { x: rightX, y: r3, w: vigW, h: rowH3 },
+    v6: { x: rightX + vigW + gap, y: r3, w: vigW2, h: rowH3 },
     banner: { x: ix, y: iy + collageH, w: iw, h: bannerH },
     collageBottom: iy + collageH,
     inner: { x: ix, y: iy, w: iw, h: ih },
   };
 }
 
-/** Which panel (0 hero, 1-5 vignettes) contains canvas point (x, y), or -1. */
+/** Which panel (0 hero, 1-6 vignettes) contains canvas point (x, y), or -1. */
 export function panelAt(L, x, y) {
-  const rects = [L.hero, L.v1, L.v2, L.v3, L.v4, L.v5];
-  for (let i = 0; i < 6; i++) {
+  const rects = [L.hero, L.v1, L.v2, L.v3, L.v4, L.v5, L.v6];
+  for (let i = 0; i < 7; i++) {
     const r = rects[i];
     if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) return i;
   }
@@ -363,10 +364,10 @@ function drawBadges(ctx, L, state, grade, w) {
   ctx.fillText('2026', 0, sr * 0.20);
   ctx.restore();
 
-  // Pink NEW circle on the wide bottom vignette (v5).
+  // Pink NEW circle on the bottom-right vignette (v6).
   const nr = Math.max(16, Math.round(w * 0.026));
-  const ncx = L.v5.x + L.v5.w - nr - Math.round(w * 0.008);
-  const ncy = L.v5.y + nr + Math.round(w * 0.008);
+  const ncx = L.v6.x + L.v6.w - nr - Math.round(w * 0.008);
+  const ncy = L.v6.y + nr + Math.round(w * 0.008);
   ctx.save();
   ctx.beginPath();
   ctx.arc(ncx, ncy, nr, 0, Math.PI * 2);
@@ -385,7 +386,7 @@ function drawBadges(ctx, L, state, grade, w) {
 
 /**
  * Draws the whole poster onto the canvas at its own size.
- * state: { grade, title, subtitle, badge, panels: [{img, zoom, ox, oy} x6] }
+ * state: { grade, title, subtitle, badge, panels: [{img, zoom, ox, oy} x7] }
  * opts: { selected } — a panel index to outline for the editor (never on export).
  */
 export function drawPoster(canvas, state, opts = {}) {
@@ -401,6 +402,7 @@ export function drawPoster(canvas, state, opts = {}) {
   drawPhotoPanel(ctx, L.v3, state.panels[3], grade);
   drawPhotoPanel(ctx, L.v4, state.panels[4], grade);
   drawPhotoPanel(ctx, L.v5, state.panels[5], grade);
+  drawPhotoPanel(ctx, L.v6, state.panels[6], grade);
   drawBanner(ctx, L.banner, grade);
   drawTitleBlock(ctx, L, state, grade, w);
   drawBadges(ctx, L, state, grade, w);
@@ -410,7 +412,7 @@ export function drawPoster(canvas, state, opts = {}) {
   ctx.strokeRect(L.frame / 2, L.frame / 2, w - L.frame, h - L.frame);
   // Editor-only selection outline (never drawn on export).
   if (typeof opts.selected === 'number' && opts.selected >= 0) {
-    const rects = [L.hero, L.v1, L.v2, L.v3, L.v4, L.v5];
+    const rects = [L.hero, L.v1, L.v2, L.v3, L.v4, L.v5, L.v6];
     const r = rects[opts.selected];
     ctx.save();
     ctx.strokeStyle = grade.accent;

@@ -1,4 +1,4 @@
-// Wires the page: pick photos for the six panels, drag to pan, zoom each panel, write the
+// Wires the page: pick photos for the seven panels, drag to pan, zoom each panel, write the
 // title, subtitle and location badge, pick a colour grade and an export size, and export the
 // poster as a PNG. A `?shot=` query sets up a fixed scene for a screenshot (./shots.js).
 import { drawPoster, posterLayout, panelAt, GRADES } from './cover.js';
@@ -16,15 +16,16 @@ const titleInput = document.getElementById('title');
 const subtitleInput = document.getElementById('subtitle');
 const badgeInput = document.getElementById('badge');
 
-const PANEL_KEYS = ['hero', 'v1', 'v2', 'v3', 'v4', 'v5'];
-// Six distinct sample photos, one per panel: hero = woman by the convertible (boulevard),
-// top-left = police car under neon, top-right = gangster at sunset, bottom-left = glamorous
-// woman on a neon street, bottom-right = orange sports car, wide bottom = neon street.
+const PANEL_KEYS = ['hero', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6'];
+// Seven distinct sample photos, one per panel: hero = woman by the convertible (boulevard),
+// row 1 = police car under neon + gangster at sunset, row 2 = glamorous woman on a neon
+// street + police officer at night, row 3 = orange sports car + neon street.
 const DEFAULT_CROPS = [
   { sample: 'boulevard', zoom: 1.15, ox: 0, oy: 0 },
   { sample: 'policecar', zoom: 1.15, ox: 0, oy: 0 },
   { sample: 'gangster', zoom: 1.15, ox: 0, oy: 0 },
   { sample: 'jablay', zoom: 1.15, ox: 0, oy: 0 },
+  { sample: 'policeofficer', zoom: 1.15, ox: 0, oy: 0 },
   { sample: 'sportscar', zoom: 1.15, ox: 0, oy: 0 },
   { sample: 'neonstreet', zoom: 1.15, ox: 0, oy: 0 },
 ];
@@ -56,7 +57,7 @@ function render() {
 }
 
 function syncZoomSliders() {
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 7; i++) {
     document.getElementById(`zoom-${PANEL_KEYS[i]}`).value = String(state.panels[i].zoom);
   }
 }
@@ -77,7 +78,7 @@ function setGrade(grade) {
 }
 
 async function loadDefaults() {
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 7; i++) {
     state.panels[i].img = await loadImage(`samples/${DEFAULT_CROPS[i].sample}.jpg`);
   }
   render();
@@ -106,7 +107,7 @@ PANEL_KEYS.forEach((key, i) => {
 document.getElementById('fill-all').addEventListener('click', () => {
   const hero = state.panels[0].img;
   if (!hero) return;
-  for (let i = 1; i < 6; i++) {
+  for (let i = 1; i < 7; i++) {
     state.panels[i].img = hero;
     state.panels[i].zoom = 1;
     state.panels[i].ox = 0;
@@ -117,7 +118,7 @@ document.getElementById('fill-all').addEventListener('click', () => {
 });
 
 document.getElementById('reset-samples').addEventListener('click', async () => {
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 7; i++) {
     state.panels[i].img = await loadImage(`samples/${DEFAULT_CROPS[i].sample}.jpg`);
     state.panels[i].zoom = DEFAULT_CROPS[i].zoom;
     state.panels[i].ox = DEFAULT_CROPS[i].ox;
@@ -168,7 +169,7 @@ canvas.addEventListener('pointerdown', (e) => {
   state.selected = i;
   render();
   const panel = state.panels[i];
-  const r = [layout.hero, layout.v1, layout.v2, layout.v3, layout.v4, layout.v5][i];
+  const r = [layout.hero, layout.v1, layout.v2, layout.v3, layout.v4, layout.v5, layout.v6][i];
   const iw = panel.img ? panel.img.naturalWidth : 1;
   const ih = panel.img ? panel.img.naturalHeight : 1;
   const base = Math.max(r.w / iw, r.h / ih) * panel.zoom;
@@ -197,8 +198,8 @@ if (document.fonts) {
 const shot = new URLSearchParams(location.search).get('shot');
 if (shot) {
   runShot(shot, new URLSearchParams(location.search), async (scene) => {
-    const names = [scene.hero, scene.v1, scene.v2, scene.v3, scene.v4, scene.v5];
-    for (let i = 0; i < 6; i++) {
+    const names = [scene.hero, scene.v1, scene.v2, scene.v3, scene.v4, scene.v5, scene.v6];
+    for (let i = 0; i < 7; i++) {
       state.panels[i].img = await loadImage(`samples/${names[i]}.jpg`);
       state.panels[i].zoom = scene.zoom ?? DEFAULT_CROPS[i].zoom;
       state.panels[i].ox = scene.ox?.[i] ?? DEFAULT_CROPS[i].ox;
