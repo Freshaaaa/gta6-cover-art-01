@@ -7,11 +7,13 @@ import { DEFAULT_ROLES, DEFAULT_SCRIPT_SUB, DEFAULT_QUOTE, DEFAULT_GAZETTE } fro
 
 export async function runShot(shot, query, setup) {
   if (shot === 'cover') document.body.classList.add('shot-cover');
-  // Load the display font BEFORE the scene renders: the title is fitted with
-  // measureText, and measuring with the fallback font would let the real (wider)
-  // Archivo Black overflow the canvas.
+  // Load the display and script fonts BEFORE the scene renders: the title is fitted
+  // with measureText, and measuring with the fallback font would let the real (wider)
+  // Archivo Black overflow the canvas; the script subtitle needs Great Vibes loaded
+  // or it falls back to the serif face.
   try {
     await document.fonts.load('16px "Archivo Black"');
+    await document.fonts.load('16px "Great Vibes"');
     await document.fonts.ready;
   } catch { /* fall back to whatever font is available */ }
   const scene = {
@@ -22,9 +24,9 @@ export async function runShot(shot, query, setup) {
     v4: query.get('v4') ?? 'policeofficer',
     v5: query.get('v5') ?? 'wheelman',
     v6: query.get('v6') ?? 'rider',
-    title: query.get('caption') ?? 'VICE SUNSET',
+    title: query.get('caption') ?? 'SUNSET HEIST',
     scriptSub: query.get('script') ?? DEFAULT_SCRIPT_SUB,
-    subtitle: query.get('sub') ?? 'CHASE THE LAST LIGHT',
+    subtitle: query.get('sub') ?? 'SEVEN CREW · ONE LAST LIGHT · NO TURNING BACK',
     badge: query.get('badge') ?? 'PALM BAY',
     quote: query.get('quote') ?? DEFAULT_QUOTE,
     gazette: query.get('gazette') ?? DEFAULT_GAZETTE,

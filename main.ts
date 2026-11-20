@@ -23,12 +23,14 @@ const here = fileURLToPath(new URL('.', import.meta.url));
 const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
 // Validate before copying: the dossier is only as good as the files it ships. Check the inputs the judge
-// actually reads — the cover module, every sample photo the seven panels load (v2: the wheelman and the
-// rider replaced the person-less sportscar panel and the duplicate neon-street panel), and every screenshot
-// shots.json names — and stop with the missing item's name instead of handing in a broken build.
+// actually reads — the cover module, the vendored script font (Great Vibes, OFL, for the subtitle),
+// every sample photo the seven panels load (v2: the wheelman and the rider replaced the person-less
+// sportscar panel and the duplicate neon-street panel), and every screenshot shots.json names — and stop
+// with the missing item's name instead of handing in a broken build.
 const panelPhotos = ['boulevard', 'policecar', 'gangster', 'jablay', 'policeofficer', 'wheelman', 'rider'];
 const required = [
   join(here, 'app', 'src', 'cover.js'),
+  join(here, 'app', 'fonts', 'GreatVibes-Regular.woff2'),
   ...panelPhotos.map((name) => join(here, 'app', 'samples', `${name}.jpg`)),
 ];
 for (const shot of JSON.parse(readFileSync(join(here, 'shots.json'), 'utf8'))) {

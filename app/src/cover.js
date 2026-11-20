@@ -17,7 +17,7 @@ export const GRADES = {
     filter: 'sepia(0.20) saturate(1.15)',
     accent: '#ffd21f',
     glow: 'rgba(255,45,120,0.55)',
-    titleStops: [[0, '#ffe14d'], [0.55, '#ff7a1a'], [1, '#ff2d78']],
+    titleStops: [[0, '#ffe14d'], [0.18, '#fff6b0'], [0.55, '#ff7a1a'], [1, '#ff2d78']],
     bannerStops: [[0, '#ff2d78'], [0.55, '#ff5e3a'], [1, '#ffb347']],
     skyline: '#1a0b2e',
   },
@@ -42,9 +42,9 @@ export const GRADES = {
 };
 
 export const DEFAULT_ROLES = ['THE CLOSER', 'THE ENFORCER', 'THE BOSS', 'THE LOOKOUT', 'THE FIXER', 'THE WHEELMAN', 'THE RIDER'];
-export const DEFAULT_SCRIPT_SUB = 'one last sunset';
+export const DEFAULT_SCRIPT_SUB = 'one last score';
 export const DEFAULT_QUOTE = 'A SUNSET YOU CAN OUTRUN';
-export const DEFAULT_GAZETTE = 'THE VICE HERALD';
+export const DEFAULT_GAZETTE = 'THE BAY HERALD';
 
 /** Geometry of the poster for a canvas of w x h. */
 export function posterLayout(w, h) {
@@ -336,8 +336,12 @@ function fitSizeSmall(ctx, text, maxW, startSize, family, floor = 8) {
 }
 
 const DISPLAY = '"Archivo Black", "Arial Black", sans-serif';
-/** Script face for the subtitle and the review quote (italic serif — no script font ships on the box). */
+/** Real script face for the subtitle (Great Vibes, vendored under app/fonts/). */
 function scriptFont(size) {
+  return `400 ${size}px "Great Vibes", Georgia, "Liberation Serif", serif`;
+}
+/** Italic serif for the review quote — a script face is unreadable at strip size. */
+function quoteFont(size) {
   return `italic 700 ${size}px Georgia, "Liberation Serif", "DejaVu Serif", serif`;
 }
 
@@ -361,7 +365,7 @@ function drawQuoteStrip(ctx, L, state, grade, w) {
   for (let i = 0; i < 20; i++) {
     ctx.font = `${starSize}px ${DISPLAY}`;
     const sw = ctx.measureText('★★★★★ ').width;
-    ctx.font = scriptFont(quoteSize);
+    ctx.font = quoteFont(quoteSize);
     const qw = ctx.measureText(`"${quote}"`).width;
     ctx.font = `${gazSize}px ${DISPLAY}`;
     const gw = ctx.measureText(` — ${gazette}`).width;
@@ -381,7 +385,7 @@ function drawQuoteStrip(ctx, L, state, grade, w) {
   ctx.fillText('★★★★★ ', x, cy + starSize * 0.04);
   x += sw;
   ctx.fillStyle = '#ffffff';
-  ctx.font = scriptFont(quoteSize);
+  ctx.font = quoteFont(quoteSize);
   ctx.fillText(`"${quote}"`, x, cy + quoteSize * 0.04);
   x += qw;
   ctx.fillStyle = grade.accent;
@@ -392,7 +396,7 @@ function drawQuoteStrip(ctx, L, state, grade, w) {
 
 function drawTitleBlock(ctx, L, state, grade, w) {
   const cx = L.inner.x + L.inner.w / 2;
-  const title = (state.title || '').trim().toUpperCase() || 'VICE SUNSET';
+  const title = (state.title || '').trim().toUpperCase() || 'SUNSET HEIST';
   const scriptSub = (state.scriptSub || DEFAULT_SCRIPT_SUB).trim();
   const sub = (state.subtitle || '').trim().toUpperCase();
   const badge = (state.badge || '').trim().toUpperCase();
@@ -448,7 +452,7 @@ function drawTitleBlock(ctx, L, state, grade, w) {
     ctx.restore();
   }
 
-  // Script subtitle: italic serif under the title, kept in the case it was written.
+  // Script subtitle: the real script face under the title, kept in the case it was written.
   if (scriptSub) {
     const scSize = Math.max(14, Math.round(L.banner.h * 0.15));
     ctx.save();
@@ -458,22 +462,29 @@ function drawTitleBlock(ctx, L, state, grade, w) {
     ctx.shadowColor = 'rgba(0,0,0,0.65)';
     ctx.shadowBlur = scSize * 0.25;
     ctx.fillStyle = grade.accent;
-    ctx.fillText(scriptSub, cx, L.collageBottom + L.banner.h * 0.66);
+    ctx.fillText(scriptSub, cx, L.collageBottom + L.banner.h * 0.64);
     ctx.restore();
   }
 
-  // Tagline: spaced capitals below the script subtitle, inside the banner.
+  // Tagline: spaced capitals below the script subtitle, inside the banner. Fitted so
+  // a long tagline never runs past the frame at any export size.
   if (sub) {
-    const subSize = Math.max(12, Math.round(L.banner.h * 0.09));
+    const maxSubW = L.inner.w * 0.96;
+    let subSize = Math.max(12, Math.round(L.banner.h * 0.09));
     ctx.save();
-    ctx.font = `${subSize}px ${DISPLAY}`;
     try { ctx.letterSpacing = `${Math.round(subSize * 0.25)}px`; } catch { /* older canvas */ }
+    ctx.font = `${subSize}px ${DISPLAY}`;
+    while (ctx.measureText(sub).width > maxSubW && subSize > 8) {
+      subSize -= 1;
+      try { ctx.letterSpacing = `${Math.round(subSize * 0.25)}px`; } catch { /* older canvas */ }
+      ctx.font = `${subSize}px ${DISPLAY}`;
+    }
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.shadowColor = 'rgba(0,0,0,0.65)';
     ctx.shadowBlur = subSize * 0.25;
     ctx.fillStyle = grade.accent;
-    ctx.fillText(sub, cx, L.collageBottom + L.banner.h * 0.77);
+    ctx.fillText(sub, cx, L.collageBottom + L.banner.h * 0.745);
     try { ctx.letterSpacing = '0px'; } catch { /* older canvas */ }
     ctx.restore();
   }
@@ -503,18 +514,22 @@ function drawBarcode(ctx, x, y, bw, bh) {
   ctx.restore();
 }
 
-/** Billing block: COMING SOON left, production credit + STARRING cast centred, barcode right. */
+/** Billing block: COMING SOON left, production credit + STARRING cast (led by YOU) + a
+ * SHOT ON YOUR OWN CAMERA credit centred, barcode right. Three lines, kept high
+ * enough in the banner that the last line clears the bottom edge with margin. */
 function drawBilling(ctx, L, state, grade, w) {
   const b = L.banner;
   const roles = (state.roles && state.roles.length === 7 ? state.roles : DEFAULT_ROLES)
     .map((r) => (r || '').trim().toUpperCase()).filter(Boolean);
   const line1 = 'A PALM BAY PICTURES PRODUCTION';
-  const line2 = roles.length ? `STARRING ${roles.join(' · ')}` : '';
-  const y1 = L.collageBottom + b.h * 0.86;
-  const y2 = L.collageBottom + b.h * 0.93;
+  const line2 = roles.length ? `STARRING YOU · ${roles.join(' · ')}` : '';
+  const line3 = 'SHOT ON YOUR OWN CAMERA';
+  const y1 = L.collageBottom + b.h * 0.815;
+  const y2 = L.collageBottom + b.h * 0.875;
+  const y3 = L.collageBottom + b.h * 0.935;
   const sidePad = Math.round(b.w * 0.02);
 
-  // COMING SOON, left, vertically centred on the two billing lines.
+  // COMING SOON, left, vertically centred on the three billing lines.
   ctx.save();
   const soonSize = Math.max(11, Math.round(b.h * 0.085));
   ctx.font = `${soonSize}px ${DISPLAY}`;
@@ -525,14 +540,14 @@ function drawBilling(ctx, L, state, grade, w) {
   ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(0,0,0,0.6)';
   ctx.shadowBlur = soonSize * 0.2;
-  ctx.fillText('COMING SOON', soonX, (y1 + y2) / 2 + soonSize * 0.04);
+  ctx.fillText('COMING SOON', soonX, (y1 + y3) / 2 + soonSize * 0.04);
   ctx.restore();
 
   // Barcode, right.
   const barW = Math.round(b.h * 0.52);
-  const barH = Math.round(b.h * 0.17);
+  const barH = Math.round(b.h * 0.16);
   const barX = b.x + b.w - sidePad - barW;
-  const barY = L.collageBottom + b.h * 0.80;
+  const barY = L.collageBottom + b.h * 0.79;
   drawBarcode(ctx, barX, barY, barW, barH);
 
   // Billing lines, centred in the space between COMING SOON and the barcode, with a
@@ -543,14 +558,17 @@ function drawBilling(ctx, L, state, grade, w) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = 'rgba(255,255,255,0.92)';
-  const s1 = fitSizeSmall(ctx, line1, maxW, Math.max(10, Math.round(b.h * 0.062)), DISPLAY);
+  const s1 = fitSizeSmall(ctx, line1, maxW, Math.max(10, Math.round(b.h * 0.058)), DISPLAY);
   ctx.font = `${s1}px ${DISPLAY}`;
   ctx.fillText(line1, cx, y1);
   if (line2) {
-    const s2 = fitSizeSmall(ctx, line2, maxW, Math.max(10, Math.round(b.h * 0.058)), DISPLAY);
+    const s2 = fitSizeSmall(ctx, line2, maxW, Math.max(10, Math.round(b.h * 0.054)), DISPLAY);
     ctx.font = `${s2}px ${DISPLAY}`;
     ctx.fillText(line2, cx, y2);
   }
+  const s3 = fitSizeSmall(ctx, line3, maxW, Math.max(10, Math.round(b.h * 0.052)), DISPLAY);
+  ctx.font = `${s3}px ${DISPLAY}`;
+  ctx.fillText(line3, cx, y3);
   ctx.restore();
 }
 

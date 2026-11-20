@@ -214,9 +214,11 @@ canvas.addEventListener('pointermove', (e) => {
 });
 canvas.addEventListener('pointerup', () => { drag = null; });
 
-// Redraw once the display font arrives so the title uses Archivo Black.
+// Redraw once the display and script fonts arrive so the title uses Archivo Black
+// and the subtitle uses Great Vibes.
 if (document.fonts) {
   document.fonts.load('16px "Archivo Black"').then(render).catch(() => {});
+  document.fonts.load('16px "Great Vibes"').then(render).catch(() => {});
   document.fonts.ready.then(render).catch(() => {});
 }
 
