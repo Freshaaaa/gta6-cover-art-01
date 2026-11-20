@@ -2,9 +2,12 @@
 // app/ folder, plain static files a desktop browser loads offline (app/index.html and its ES modules, no
 // library and no network request), and the program hands it in. It copies app/ and screenshots/ from beside
 // this file to /output and writes /output/dossier.json, the summary the judge reads, with the vendored
-// make.fun library. The app: photos + a caption become GTA-style poster art — a 7-panel collage (hero +
-// 2x3 vignette grid, 9 sample photos) with a huge gradient title, a sunset banner, decorative badges, 3
-// color grades (Vice Sunset / Neon Nights / Vice Noir), and PNG export in 3 sizes (1080x1080, 1080x1350,
+// make.fun library. The app: photos + a caption become GTA-style poster art — a 7-panel collage (pop-out
+// hero with a slanted edge + six vignettes in staggered rows with alternating slants, 11 sample photos,
+// every panel showing a person) with a review-quote strip, cast-style role tags on every panel, a huge
+// gradient title, a script subtitle, a sunset banner with skyline and palms, a billing block (COMING SOON,
+// production credit + STARRING cast, barcode), a gold ORIGINAL COVER ART seal, decorative badges, 3 color
+// grades (Vice Sunset / Neon Nights / Vice Noir), and PNG export in 3 sizes (1080x1080, 1080x1350,
 // 1920x1080). Put your 4 PNG or JPEG screenshots in screenshots/ (the first by name is the cover) and run it.
 //
 // Serve it locally with `node serve.ts`, then open http://localhost:8080.
@@ -20,9 +23,10 @@ const here = fileURLToPath(new URL('.', import.meta.url));
 const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
 // Validate before copying: the dossier is only as good as the files it ships. Check the inputs the judge
-// actually reads — the cover module, every sample photo the seven panels load, and every screenshot
+// actually reads — the cover module, every sample photo the seven panels load (v2: the wheelman and the
+// rider replaced the person-less sportscar panel and the duplicate neon-street panel), and every screenshot
 // shots.json names — and stop with the missing item's name instead of handing in a broken build.
-const panelPhotos = ['boulevard', 'policecar', 'gangster', 'jablay', 'policeofficer', 'sportscar', 'neonstreet'];
+const panelPhotos = ['boulevard', 'policecar', 'gangster', 'jablay', 'policeofficer', 'wheelman', 'rider'];
 const required = [
   join(here, 'app', 'src', 'cover.js'),
   ...panelPhotos.map((name) => join(here, 'app', 'samples', `${name}.jpg`)),

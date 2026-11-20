@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/gta6-cover-art-01/Freshaaaa/gta6-cover-art-01/rank.svg)](https://make.fun/bounty/gta6-cover-art-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 [![reward](https://make.fun/badge/gta6-cover-art-01/Freshaaaa/gta6-cover-art-01/reward.svg)](https://make.fun/bounty/gta6-cover-art-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 
-Vice Cover — turn photos + a caption into GTA-style poster art. A multi-panel collage (hero + 2x3 vignette grid, 9 sample photos) with a huge gradient title, a sunset banner with skyline and palms, decorative badges, 3 color grades (Vice Sunset / Neon Nights / Vice Noir), and PNG export in 3 sizes (1080x1080, 1080x1350, 1920x1080). Per-panel photo upload, drag-to-pan, per-panel zoom sliders, title/subtitle/badge inputs.
+Vice Cover — turn photos + a caption into GTA-style poster art. A multi-panel collage (pop-out hero with a slanted edge + six vignettes in staggered rows with alternating slants, 11 sample photos, every panel showing a person) with a review-quote strip, cast-style role tags on every panel, a huge gradient title, a script subtitle, a sunset banner with skyline and palms, a billing block (COMING SOON, production credit + STARRING cast, barcode), a gold ORIGINAL COVER ART seal, decorative badges, 3 color grades (Vice Sunset / Neon Nights / Vice Noir), and PNG export in 3 sizes (1080x1080, 1080x1350, 1920x1080). Per-panel photo upload (client-side, FileReader — nothing leaves the browser), drag-to-pan, per-panel zoom sliders, editable title / script subtitle / tagline / badge / quote / gazette / role tags (the tags also fill the STARRING billing line).
 
 ## Run it
 

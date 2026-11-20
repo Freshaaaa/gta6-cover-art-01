@@ -1,20 +1,34 @@
 // Fixed scenes for screenshots: ?shot=editor shows the page with sample photos loaded;
 // ?shot=cover shows the cover alone. Query params: photo (hero sample), v1/v2/v3/v4/v5/v6
-// (vignette samples), caption (title), sub (subtitle), badge (location pill), grade, size.
-// window.__shotReady is set once the scene is painted with the display font loaded.
+// (vignette samples), caption (title), script (script subtitle), sub (tagline), badge
+// (location pill), quote (review quote), gazette (quote source), r0..r6 (role tags),
+// grade, size. window.__shotReady is set once the scene is painted with the display font loaded.
+import { DEFAULT_ROLES, DEFAULT_SCRIPT_SUB, DEFAULT_QUOTE, DEFAULT_GAZETTE } from './cover.js';
+
 export async function runShot(shot, query, setup) {
   if (shot === 'cover') document.body.classList.add('shot-cover');
+  // Load the display font BEFORE the scene renders: the title is fitted with
+  // measureText, and measuring with the fallback font would let the real (wider)
+  // Archivo Black overflow the canvas.
+  try {
+    await document.fonts.load('16px "Archivo Black"');
+    await document.fonts.ready;
+  } catch { /* fall back to whatever font is available */ }
   const scene = {
     hero: query.get('photo') ?? 'boulevard',
     v1: query.get('v1') ?? 'policecar',
     v2: query.get('v2') ?? 'gangster',
     v3: query.get('v3') ?? 'jablay',
-    v4: query.get('v4') ?? 'sportscar',
-    v5: query.get('v5') ?? 'sportscar',
-    v6: query.get('v6') ?? 'neonstreet',
+    v4: query.get('v4') ?? 'policeofficer',
+    v5: query.get('v5') ?? 'wheelman',
+    v6: query.get('v6') ?? 'rider',
     title: query.get('caption') ?? 'VICE SUNSET',
+    scriptSub: query.get('script') ?? DEFAULT_SCRIPT_SUB,
     subtitle: query.get('sub') ?? 'CHASE THE LAST LIGHT',
     badge: query.get('badge') ?? 'PALM BAY',
+    quote: query.get('quote') ?? DEFAULT_QUOTE,
+    gazette: query.get('gazette') ?? DEFAULT_GAZETTE,
+    roles: DEFAULT_ROLES.map((d, i) => query.get(`r${i}`) ?? d),
     grade: query.get('grade') ?? 'sunset',
     size: query.get('size') ?? '1080x1080',
   };

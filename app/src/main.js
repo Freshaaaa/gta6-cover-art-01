@@ -1,7 +1,7 @@
 // Wires the page: pick photos for the seven panels, drag to pan, zoom each panel, write the
 // title, subtitle and location badge, pick a colour grade and an export size, and export the
 // poster as a PNG. A `?shot=` query sets up a fixed scene for a screenshot (./shots.js).
-import { drawPoster, posterLayout, panelAt, GRADES } from './cover.js';
+import { drawPoster, posterLayout, panelAt, GRADES, DEFAULT_ROLES, DEFAULT_SCRIPT_SUB, DEFAULT_QUOTE, DEFAULT_GAZETTE } from './cover.js';
 import { runShot } from './shots.js';
 
 const SIZES = {
@@ -13,29 +13,38 @@ const SIZES = {
 const canvas = document.getElementById('cover');
 const status = document.getElementById('status');
 const titleInput = document.getElementById('title');
+const scriptSubInput = document.getElementById('scriptsub');
 const subtitleInput = document.getElementById('subtitle');
 const badgeInput = document.getElementById('badge');
+const quoteInput = document.getElementById('quote');
+const gazetteInput = document.getElementById('gazette');
 
 const PANEL_KEYS = ['hero', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6'];
+const roleInputs = PANEL_KEYS.map((key) => document.getElementById(`role-${key}`));
 // Seven distinct sample photos, one per panel: hero = woman by the convertible (boulevard),
 // row 1 = police car under neon + gangster at sunset, row 2 = glamorous woman on a neon
-// street + police officer at night, row 3 = orange sports car + neon street.
+// street + police officer at night, row 3 = wheelman with his orange supercar + rider on a
+// neon street at night. Every panel shows a person (the police car is the enforcer's ride).
 const DEFAULT_CROPS = [
   { sample: 'boulevard', zoom: 1.5, ox: 0, oy: 0.9 },
   { sample: 'policecar', zoom: 1.15, ox: 0, oy: 0 },
   { sample: 'gangster', zoom: 1.15, ox: 0, oy: 0 },
-  { sample: 'jablay', zoom: 1.15, ox: 0, oy: 0 },
+  { sample: 'jablay', zoom: 1.15, ox: 0, oy: 0.8 },
   { sample: 'policeofficer', zoom: 1.15, ox: 0, oy: 0 },
-  { sample: 'sportscar', zoom: 1.15, ox: 0, oy: 0 },
-  { sample: 'neonstreet', zoom: 1.15, ox: 0, oy: 0 },
+  { sample: 'wheelman', zoom: 1.2, ox: 0, oy: 0.1 },
+  { sample: 'rider', zoom: 1.15, ox: 0.1, oy: 0 },
 ];
 
 const state = {
   size: '1080x1080',
   grade: 'sunset',
   title: titleInput.value,
+  scriptSub: scriptSubInput.value,
   subtitle: subtitleInput.value,
   badge: badgeInput.value,
+  quote: quoteInput.value,
+  gazette: gazetteInput.value,
+  roles: roleInputs.map((input) => input.value),
   selected: 0,
   panels: DEFAULT_CROPS.map((c) => ({ img: null, zoom: c.zoom, ox: c.ox, oy: c.oy })),
 };
@@ -84,12 +93,22 @@ async function loadDefaults() {
   render();
 }
 
-// Photo inputs: one per panel.
+// Photo inputs: one per panel. Files are read client-side with FileReader — nothing is
+// uploaded anywhere; the data URL becomes the panel's photo.
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 PANEL_KEYS.forEach((key, i) => {
   document.getElementById(`photo-${key}`).addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    state.panels[i].img = await loadImage(URL.createObjectURL(file));
+    state.panels[i].img = await loadImage(await readFileAsDataURL(file));
     state.panels[i].zoom = 1;
     state.panels[i].ox = 0;
     state.panels[i].oy = 0;
@@ -129,8 +148,14 @@ document.getElementById('reset-samples').addEventListener('click', async () => {
 });
 
 titleInput.addEventListener('input', () => { state.title = titleInput.value; render(); });
+scriptSubInput.addEventListener('input', () => { state.scriptSub = scriptSubInput.value; render(); });
 subtitleInput.addEventListener('input', () => { state.subtitle = subtitleInput.value; render(); });
 badgeInput.addEventListener('input', () => { state.badge = badgeInput.value; render(); });
+quoteInput.addEventListener('input', () => { state.quote = quoteInput.value; render(); });
+gazetteInput.addEventListener('input', () => { state.gazette = gazetteInput.value; render(); });
+roleInputs.forEach((input, i) => {
+  input.addEventListener('input', () => { state.roles[i] = input.value; render(); });
+});
 
 document.querySelectorAll('#grades button').forEach((b) => {
   b.addEventListener('click', () => setGrade(b.dataset.grade));
@@ -206,11 +231,19 @@ if (shot) {
       state.panels[i].oy = scene.oy?.[i] ?? DEFAULT_CROPS[i].oy;
     }
     state.title = scene.title;
+    state.scriptSub = scene.scriptSub;
     state.subtitle = scene.subtitle;
     state.badge = scene.badge;
+    state.quote = scene.quote;
+    state.gazette = scene.gazette;
+    state.roles = scene.roles;
     titleInput.value = scene.title;
+    scriptSubInput.value = scene.scriptSub;
     subtitleInput.value = scene.subtitle;
     badgeInput.value = scene.badge;
+    quoteInput.value = scene.quote;
+    gazetteInput.value = scene.gazette;
+    roleInputs.forEach((input, i) => { input.value = scene.roles[i]; });
     setGrade(scene.grade);
     setSize(scene.size);
     state.selected = -1;
