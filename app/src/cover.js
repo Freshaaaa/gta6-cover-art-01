@@ -17,7 +17,7 @@ export const GRADES = {
     filter: 'sepia(0.20) saturate(1.15)',
     accent: '#ffd21f',
     glow: 'rgba(255,45,120,0.55)',
-    titleStops: [[0, '#ffe14d'], [0.18, '#fff6b0'], [0.55, '#ff7a1a'], [1, '#ff2d78']],
+    titleStops: [[0, '#ffe14d'], [0.18, '#fff6b0'], [0.5, '#ff7a1a'], [0.8, '#ff2d78'], [1, '#c026d3']],
     bannerStops: [[0, '#ff2d78'], [0.55, '#ff5e3a'], [1, '#ffb347']],
     skyline: '#1a0b2e',
   },
@@ -26,7 +26,7 @@ export const GRADES = {
     filter: '',
     accent: '#00f0ff',
     glow: 'rgba(255,45,212,0.55)',
-    titleStops: [[0, '#fff06a'], [0.5, '#ff9a1f'], [1, '#ff2dd4']],
+    titleStops: [[0, '#fff06a'], [0.45, '#ff9a1f'], [0.8, '#ff2dd4'], [1, '#8b5cf6']],
     bannerStops: [[0, '#2b0a4e'], [0.55, '#7a0f6e'], [1, '#ff2dd4']],
     skyline: '#0d0218',
   },
@@ -276,7 +276,7 @@ function drawPalm(ctx, x, y, s, color) {
 
 /** Skyline silhouette along the bottom of the banner: dark buildings, lit windows, palms. */
 function drawSkyline(ctx, b, grade, w) {
-  const stripH = b.h * 0.05;
+  const stripH = b.h * 0.035;
   const baseY = b.y + b.h;
   ctx.save();
   ctx.fillStyle = grade.skyline;
@@ -420,11 +420,12 @@ function drawTitleBlock(ctx, L, state, grade, w) {
   ctx.shadowBlur = size * 0.16;
   ctx.shadowOffsetY = size * 0.03;
   ctx.strokeStyle = '#160a1e';
-  ctx.lineWidth = size * 0.10;
+  ctx.lineWidth = size * 0.11;
   ctx.strokeText(title, cx, baseline);
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetY = 0;
+  // Soft dark drop shadow under the fill, for a more three-dimensional title.
+  ctx.shadowColor = 'rgba(20,8,30,0.5)';
+  ctx.shadowBlur = size * 0.07;
+  ctx.shadowOffsetY = size * 0.045;
   ctx.fillStyle = grad;
   ctx.fillText(title, cx, baseline);
   ctx.restore();
@@ -452,17 +453,24 @@ function drawTitleBlock(ctx, L, state, grade, w) {
     ctx.restore();
   }
 
-  // Script subtitle: the real script face under the title, kept in the case it was written.
+  // Script subtitle: the real script face under the title, kept in the case it was
+  // written. Bigger and white with a dark outline + soft shadow, so it pops off the
+  // bright banner gradient instead of fading into it.
   if (scriptSub) {
-    const scSize = Math.max(14, Math.round(L.banner.h * 0.15));
+    const scSize = Math.max(14, Math.round(L.banner.h * 0.20));
     ctx.save();
     ctx.font = scriptFont(scSize);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
-    ctx.shadowColor = 'rgba(0,0,0,0.65)';
-    ctx.shadowBlur = scSize * 0.25;
-    ctx.fillStyle = grade.accent;
-    ctx.fillText(scriptSub, cx, L.collageBottom + L.banner.h * 0.64);
+    ctx.lineJoin = 'round';
+    ctx.shadowColor = 'rgba(0,0,0,0.7)';
+    ctx.shadowBlur = scSize * 0.3;
+    ctx.shadowOffsetY = scSize * 0.05;
+    ctx.strokeStyle = 'rgba(20,8,30,0.6)';
+    ctx.lineWidth = scSize * 0.05;
+    ctx.strokeText(scriptSub, cx, L.collageBottom + L.banner.h * 0.66);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(scriptSub, cx, L.collageBottom + L.banner.h * 0.66);
     ctx.restore();
   }
 
@@ -524,9 +532,9 @@ function drawBilling(ctx, L, state, grade, w) {
   const line1 = 'A PALM BAY PICTURES PRODUCTION';
   const line2 = roles.length ? `STARRING YOU · ${roles.join(' · ')}` : '';
   const line3 = 'SHOT ON YOUR OWN CAMERA';
-  const y1 = L.collageBottom + b.h * 0.815;
-  const y2 = L.collageBottom + b.h * 0.875;
-  const y3 = L.collageBottom + b.h * 0.935;
+  const y1 = L.collageBottom + b.h * 0.805;
+  const y2 = L.collageBottom + b.h * 0.86;
+  const y3 = L.collageBottom + b.h * 0.915;
   const sidePad = Math.round(b.w * 0.02);
 
   // COMING SOON, left, vertically centred on the three billing lines.
